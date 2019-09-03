@@ -12,6 +12,29 @@ import (
 	"github.com/google/uuid"
 )
 
+const ddbTableName = "shifts"
+
+func ScanShifts(c *gin.Context) {
+	ddb := DynamoDBFromContext(c)
+	results, err := ddb.Scan(&dynamodb.ScanInput{
+		TableName: aws.String(ddbTableName),
+	})
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	items := []Shift{}
+	err = dynamodbattribute.UnmarshalListOfMaps(results.Items, &items)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	for _, item := range items {
+		log.Printf("%+v", item)
+	}
+}
+
 type Shift struct {
 	ID        uuid.UUID
 	UserID    int
@@ -56,7 +79,7 @@ func (s *Shift) Put(c *gin.Context) (*dynamodb.PutItemOutput, error) {
 	}
 	input := &dynamodb.PutItemInput{
 		Item:      av,
-		TableName: aws.String("shifts"),
+		TableName: aws.String(ddbTableName),
 	}
 	log.Printf("%v", input)
 	ddb := DynamoDBFromContext(c)

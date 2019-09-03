@@ -10,7 +10,8 @@ import (
 )
 
 func GetAll(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{})
+	model.ScanShifts(c)
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 type createForm struct {
