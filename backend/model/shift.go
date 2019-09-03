@@ -37,10 +37,10 @@ func ScanShifts(c *gin.Context) ([]Shift, error) {
 
 type Shift struct {
 	ID        uuid.UUID `json:"id"`
-	UserID    int       `form:"uid" json:"uid"`
-	AccountID int       `form:"aid" json:"aid"`
-	StartTime time.Time `form:"startTime" json:"startTime" time_format:"2006-01-02T15:04:05"`
-	EndTime   time.Time `form:"endTime" json:"endTime" time_format:"2006-01-02T15:04:05"`
+	UserID    int       `form:"uid"`
+	AccountID int       `form:"aid"`
+	StartTime time.Time `form:"startTime" time_format:"2006-01-02T15:04:05"`
+	EndTime   time.Time `form:"endTime" time_format:"2006-01-02T15:04:05"`
 }
 
 // Create a new shift structure
