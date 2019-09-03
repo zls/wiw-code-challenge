@@ -1,7 +1,7 @@
 package shifts
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,26 +22,25 @@ func Create(c *gin.Context) {
 	var data model.Shift
 	err := c.BindJSON(&data)
 	if err != nil {
-		log.Printf("error %v", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{})
+		c.Error(fmt.Errorf("unable to bind json to struct, %v", err.Error()))
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		return
 	}
 
 	shift, err := model.NewShift(data.UserID, data.AccountID, data.StartTime, data.EndTime)
 	if err != nil {
+		c.Error(fmt.Errorf("unable to create new shift object %v", err.Error()))
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		return
 	}
 	_, err = shift.Put(c)
 	if err != nil {
+		c.Error(fmt.Errorf("failed to write shift, %v", err.Error()))
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"uid":       data.UserID,
-		"aid":       data.AccountID,
-		"startTime": data.StartTime,
-		"endTime":   data.EndTime,
+		"shift": data,
 	})
 }

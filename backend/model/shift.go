@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -47,7 +48,6 @@ type Shift struct {
 func NewShift(uid int, aid int, start time.Time, end time.Time) (*Shift, error) {
 	sid, err := uuid.NewRandom()
 	if err != nil {
-		log.Fatal(err.Error())
 		return nil, errors.New("Failed to get new Shift UUID")
 	}
 	shift := &Shift{
@@ -74,18 +74,17 @@ func (s *Shift) Overlaps(otherShift *Shift) bool {
 func (s *Shift) Put(c *gin.Context) (*dynamodb.PutItemOutput, error) {
 	av, err := dynamodbattribute.MarshalMap(*s)
 	if err != nil {
-		log.Printf("failed to marshal attr map %v", err.Error())
+		c.Error(fmt.Errorf("failed to marshal attr map %v", err.Error()))
 		return nil, err
 	}
 	input := &dynamodb.PutItemInput{
 		Item:      av,
 		TableName: aws.String(ddbTableName),
 	}
-	log.Printf("%v", input)
 	ddb := DynamoDBFromContext(c)
 	output, err := ddb.PutItem(input)
 	if err != nil {
-		log.Printf("failed to put item %v", err.Error())
+		c.Error(fmt.Errorf("failed to put item %v", err.Error()))
 		return nil, err
 	}
 	return output, nil
