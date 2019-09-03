@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/zls/wiw-code-challenge/backend/handler"
+	"github.com/zls/wiw-code-challenge/backend/handler/shifts"
 )
 
 type Routes struct {
@@ -14,23 +14,19 @@ type Routes struct {
 func (r *Routes) Register(router *gin.Engine) {
 	r.Shifts = router.Group("/shifts")
 	{
-		r.Shifts.GET("/", getAllShifts)
-		r.Shifts.GET("/:id", getShiftByID)
+		r.Shifts.GET("/", shifts.GetAll)
+		r.Shifts.GET("/:id", handler.NotImplemented)
 
-		r.Shifts.POST("/", notImplemented)
-		r.Shifts.POST("/:id", notImplemented)
+		r.Shifts.POST("/", shifts.Create)
+		r.Shifts.POST("/:id", handler.NotImplemented)
 
-		r.Shifts.PUT("/", notImplemented)
-		r.Shifts.PUT("/:id", notImplemented)
+		r.Shifts.PUT("/", handler.NotImplemented)
+		r.Shifts.PUT("/:id", handler.NotImplemented)
 
-		r.Shifts.PATCH("/", notImplemented)
-		r.Shifts.PATCH("/:id", notImplemented)
+		r.Shifts.PATCH("/", handler.NotImplemented)
+		r.Shifts.PATCH("/:id", handler.NotImplemented)
 
-		r.Shifts.DELETE("/", notImplemented)
-		r.Shifts.DELETE("/:id", notImplemented)
+		r.Shifts.DELETE("/", handler.NotImplemented)
+		r.Shifts.DELETE("/:id", handler.NotImplemented)
 	}
-}
-
-func notImplemented(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{})
 }
