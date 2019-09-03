@@ -3,7 +3,6 @@ package shifts
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zls/wiw-code-challenge/backend/model"
@@ -14,19 +13,11 @@ func GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-type createForm struct {
-	UID       int       `form:"uid"`
-	AID       int       `form:"aid"`
-	PID       int       `form:"pid"`
-	StartTime time.Time `form:"startTime" time_format:"2006-01-02T15:04:05"`
-	EndTime   time.Time `form:"endTime" time_format:"2006-01-02T15:04:05"`
-}
-
 func Create(c *gin.Context) {
-	var data createForm
+	var data model.Shift
 	err := c.BindJSON(&data)
 	if err == nil {
-		shift, err := model.NewShift(data.UID, data.PID, data.AID, data.StartTime, data.EndTime)
+		shift, err := model.NewShift(data.UserID, data.AccountID, data.StartTime, data.EndTime)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 			return
@@ -37,9 +28,8 @@ func Create(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"uid":       data.UID,
-			"pid":       data.PID,
-			"aid":       data.AID,
+			"uid":       data.UserID,
+			"aid":       data.AccountID,
 			"startTime": data.StartTime,
 			"endTime":   data.EndTime,
 		})

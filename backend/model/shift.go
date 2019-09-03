@@ -37,14 +37,14 @@ func ScanShifts(c *gin.Context) {
 
 type Shift struct {
 	ID        uuid.UUID
-	UserID    int
-	AccountID int
-	StartTime time.Time
-	EndTime   time.Time
+	UserID    int       `form:"uid"`
+	AccountID int       `form:"aid"`
+	StartTime time.Time `form:"startTime" time_format:"2006-01-02T15:04:05"`
+	EndTime   time.Time `form:"endTime" time_format:"2006-01-02T15:04:05"`
 }
 
 // Create a new shift structure
-func NewShift(uid int, pid int, aid int, start time.Time, end time.Time) (*Shift, error) {
+func NewShift(uid int, aid int, start time.Time, end time.Time) (*Shift, error) {
 	sid, err := uuid.NewRandom()
 	if err != nil {
 		log.Fatal(err.Error())
