@@ -9,8 +9,14 @@ import (
 )
 
 func GetAll(c *gin.Context) {
-	model.ScanShifts(c)
-	c.JSON(http.StatusOK, gin.H{})
+	shifts, err := model.ScanShifts(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{})
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"shifts":  &shifts,
+		"message": "ok",
+	})
 }
 
 func Create(c *gin.Context) {

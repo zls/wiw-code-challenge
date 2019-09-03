@@ -14,33 +14,33 @@ import (
 
 const ddbTableName = "shifts"
 
-func ScanShifts(c *gin.Context) {
+func ScanShifts(c *gin.Context) ([]Shift, error) {
 	ddb := DynamoDBFromContext(c)
 	results, err := ddb.Scan(&dynamodb.ScanInput{
 		TableName: aws.String(ddbTableName),
 	})
 	if err != nil {
 		c.Error(err)
-		return
+		return nil, err
 	}
-	items := []Shift{}
-	err = dynamodbattribute.UnmarshalListOfMaps(results.Items, &items)
+	shifts := []Shift{}
+	err = dynamodbattribute.UnmarshalListOfMaps(results.Items, &shifts)
 	if err != nil {
 		c.Error(err)
-		return
+		return nil, err
 	}
 
-	for _, item := range items {
-		log.Printf("%+v", item)
-	}
+	log.Printf("%+v", shifts)
+
+	return shifts, nil
 }
 
 type Shift struct {
-	ID        uuid.UUID
-	UserID    int       `form:"uid"`
-	AccountID int       `form:"aid"`
-	StartTime time.Time `form:"startTime" time_format:"2006-01-02T15:04:05"`
-	EndTime   time.Time `form:"endTime" time_format:"2006-01-02T15:04:05"`
+	ID        uuid.UUID `json:"id"`
+	UserID    int       `form:"uid" json:"uid"`
+	AccountID int       `form:"aid" json:"aid"`
+	StartTime time.Time `form:"startTime" json:"startTime" time_format:"2006-01-02T15:04:05"`
+	EndTime   time.Time `form:"endTime" json:"endTime" time_format:"2006-01-02T15:04:05"`
 }
 
 // Create a new shift structure
