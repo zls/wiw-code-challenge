@@ -7,4 +7,7 @@ build:
 run:
 	./build/server
 
+test:
+	go test  ./...
+
 all: build run

@@ -13,8 +13,6 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(model.NewDynamoDB())
 
-	// model.OpenDDBConnection()
-
 	api := routes.Routes{}
 	api.Register(router)
 
