@@ -51,17 +51,18 @@ func (s *Shift) Overlaps(otherShift *Shift) bool {
 func (s *Shift) Put(c *gin.Context) (*dynamodb.PutItemOutput, error) {
 	av, err := dynamodbattribute.MarshalMap(*s)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Printf("failed to marshal attr map %v", err.Error())
 		return nil, err
 	}
 	input := &dynamodb.PutItemInput{
 		Item:      av,
 		TableName: aws.String("shifts"),
 	}
+	log.Printf("%v", input)
 	ddb := DynamoDBFromContext(c)
 	output, err := ddb.PutItem(input)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Printf("failed to put item %v", err.Error())
 		return nil, err
 	}
 	return output, nil
