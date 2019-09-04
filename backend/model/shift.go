@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -34,6 +35,42 @@ func ScanShifts(c *gin.Context) ([]Shift, error) {
 	log.Printf("%+v", shifts)
 
 	return shifts, nil
+}
+
+func GetShiftByID(c *gin.Context, id string) (*Shift, error) {
+	idUUID, err := uuid.Parse(id)
+	idBytes, err := idUUID.MarshalBinary()
+	shift := Shift{}
+	if err != nil {
+		c.Error(fmt.Errorf("failed to marshal uuid to bytes, %v", err))
+		return nil, err
+	}
+	ddb := DynamoDBFromContext(c)
+	keyCond := expression.Key("ID").Equal(expression.Value(idBytes))
+	expr, err := expression.NewBuilder().WithKeyCondition(keyCond).Build()
+	if err != nil {
+		c.Error(fmt.Errorf("failed to build keycondition, %v", err))
+		return nil, err
+	}
+	results, err := ddb.Query(&dynamodb.QueryInput{
+		TableName:                 aws.String(ddbTableName),
+		IndexName:                 aws.String("ByID"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		KeyConditionExpression:    expr.KeyCondition(),
+	})
+
+	// TODO <zls>: see if there is a constraint on ID to ensure uniqueness
+	// TODO <zls>: split this out to more easily catch
+	if err != nil || len(results.Items) > 1 {
+		c.Error(fmt.Errorf("failed to find shift in db, %v", err))
+		return nil, err
+	}
+	err = dynamodbattribute.UnmarshalMap(results.Items[0], &shift)
+	if err != nil {
+		c.Error(fmt.Errorf("failed to unmarshal results to shift, %v", err))
+	}
+	return &shift, nil
 }
 
 type Shift struct {

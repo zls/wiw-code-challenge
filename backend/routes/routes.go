@@ -15,7 +15,7 @@ func (r *Routes) Register(router *gin.Engine) {
 	r.Shifts = router.Group("/shifts")
 	{
 		r.Shifts.GET("/", shifts.GetAll)
-		r.Shifts.GET("/:id", handler.NotImplemented)
+		r.Shifts.GET("/:id", shifts.GetByID)
 
 		r.Shifts.POST("/", shifts.Create)
 		r.Shifts.POST("/:id", handler.NotImplemented)

@@ -18,6 +18,19 @@ func GetAll(c *gin.Context) {
 	})
 }
 
+func GetByID(c *gin.Context) {
+	id := c.Param("id")
+	shift, err := model.GetShiftByID(c, id)
+	if err != nil {
+		c.Error(fmt.Errorf("failed to get shift by id, %v", err))
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"shift": shift,
+	})
+}
+
 func Create(c *gin.Context) {
 	var data model.Shift
 	err := c.BindJSON(&data)
