@@ -18,15 +18,9 @@ func (r *Routes) Register(router *gin.Engine) {
 		r.Shifts.GET("/:id", shifts.GetByID)
 
 		r.Shifts.POST("/", shifts.Create)
-		r.Shifts.POST("/:id", handler.NotImplemented)
 
-		r.Shifts.PUT("/", handler.NotImplemented)
 		r.Shifts.PUT("/:id", handler.NotImplemented)
 
-		r.Shifts.PATCH("/", handler.NotImplemented)
-		r.Shifts.PATCH("/:id", handler.NotImplemented)
-
-		r.Shifts.DELETE("/", handler.NotImplemented)
 		r.Shifts.DELETE("/:id", handler.NotImplemented)
 	}
 }

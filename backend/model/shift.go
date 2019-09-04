@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -63,17 +64,22 @@ func GetShifts(c *gin.Context) (*[]Shift, error) {
 	// filter expression
 	var filterExpr expression.ConditionBuilder
 	if len(endTime) > 0 {
-		log.Printf("found endTime, %v", startTime)
+		log.Printf("found endTime, %v", endTime)
 		filterExpr = expression.Name("EndTime").Between(expression.Value(startTime), expression.Value(endTime))
 		filterSet = true
 	}
 	if len(userID) > 0 {
-		log.Printf("found userID, %v", userID)
+		uid, err := strconv.Atoi(userID)
+		if err != nil {
+			c.Error(fmt.Errorf("failed to convert userid to a string, %v", err))
+			return nil, err
+		}
+		log.Printf("found userID, %v", uid)
 		filterExpr = expression.Name("EndTime").Between(expression.Value(startTime), expression.Value(endTime))
 		if filterSet {
-			filterExpr.And(expression.Name("UserID").Equal(expression.Value(userID)))
+			filterExpr.And(expression.Name("UserID").Equal(expression.Value(uid)))
 		} else {
-			filterExpr = expression.Name("UserID").Equal(expression.Value(userID))
+			filterExpr = expression.Name("UserID").Equal(expression.Value(uid))
 		}
 		filterSet = true
 	}
