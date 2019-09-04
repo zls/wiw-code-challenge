@@ -14,7 +14,7 @@ type Routes struct {
 func (r *Routes) Register(router *gin.Engine) {
 	r.Shifts = router.Group("/shifts")
 	{
-		r.Shifts.GET("/", shifts.GetAll)
+		r.Shifts.GET("/", shifts.GetShifts)
 		r.Shifts.GET("/:id", shifts.GetByID)
 
 		r.Shifts.POST("/", shifts.Create)

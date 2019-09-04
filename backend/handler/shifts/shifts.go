@@ -18,6 +18,19 @@ func GetAll(c *gin.Context) {
 	})
 }
 
+func GetShifts(c *gin.Context) {
+	shifts, err := model.GetShifts(c)
+	if err != nil {
+		c.Error(fmt.Errorf("failed to get shifts, %v", err))
+		c.JSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"shifts": shifts,
+	})
+
+}
+
 func GetByID(c *gin.Context) {
 	id := c.Param("id")
 	shift, err := model.GetShiftByID(c, id)

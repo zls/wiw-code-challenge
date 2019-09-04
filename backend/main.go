@@ -12,6 +12,7 @@ func main() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(model.NewDynamoDB())
+	router.Use(model.NewMockSession())
 
 	api := routes.Routes{}
 	api.Register(router)
