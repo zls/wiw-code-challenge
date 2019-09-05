@@ -166,18 +166,15 @@ func NewShift(uid int, aid int, start time.Time, end time.Time) (*Shift, error) 
 		StartTime: start,
 		EndTime:   end,
 	}
+	if !shift.isLinearTime() {
+		return nil, errors.New("Start time is after end time")
+	}
 	return shift, nil
 }
 
-func (s *Shift) Overlaps(otherShift *Shift) bool {
-	if s.UserID != otherShift.UserID {
-		return false
-	}
-	if (s.StartTime.Unix() >= otherShift.StartTime.Unix() && s.StartTime.Unix() <= otherShift.EndTime.Unix()) ||
-		(s.EndTime.Unix() <= otherShift.EndTime.Unix() && s.EndTime.Unix() >= otherShift.StartTime.Unix()) {
-		return true
-	}
-	return false
+// Check shift does not require a time traveller
+func (s *Shift) isLinearTime() bool {
+	return s.StartTime.Before(s.EndTime)
 }
 
 func (s *Shift) Put(c *gin.Context) (*dynamodb.PutItemOutput, error) {
@@ -186,15 +183,34 @@ func (s *Shift) Put(c *gin.Context) (*dynamodb.PutItemOutput, error) {
 		c.Error(fmt.Errorf("failed to marshal attr map %v", err.Error()))
 		return nil, err
 	}
-	input := &dynamodb.PutItemInput{
-		Item:      av,
-		TableName: aws.String(ddbTableName),
+	exprBuilder := expression.NewBuilder()
+	// Start time does not fall between another start and end time
+	cond := expression.Not(expression.Name("StartTime").Between(expression.Value(s.StartTime), expression.Value(s.EndTime)))
+	// End time does not fall between another start and end time
+	cond2 := cond.And(expression.Not(expression.Name("EndTime").Between(expression.Value(s.StartTime), expression.Value(s.EndTime))))
+	exprBuilder = exprBuilder.WithCondition(cond2)
+
+	expr, err := exprBuilder.Build()
+	if err != nil {
+		c.Error(fmt.Errorf("failed to build expression, %v", err))
+		return nil, err
 	}
+
+	input := &dynamodb.PutItemInput{
+		Item:                      av,
+		ConditionExpression:       expr.Condition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		TableName:                 aws.String(ddbTableName),
+	}
+	log.Printf("%+v", input)
+
 	ddb := DynamoDBFromContext(c)
 	output, err := ddb.PutItem(input)
 	if err != nil {
 		c.Error(fmt.Errorf("failed to put item %v", err.Error()))
 		return nil, err
 	}
+	log.Printf("%+v", output)
 	return output, nil
 }

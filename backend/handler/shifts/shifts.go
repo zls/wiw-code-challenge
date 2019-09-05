@@ -86,6 +86,6 @@ func Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"shift": data,
+		"shift": shift,
 	})
 }
