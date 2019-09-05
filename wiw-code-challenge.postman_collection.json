@@ -1,0 +1,86 @@
+{
+	"variables": [],
+	"info": {
+		"name": "wiw-code-challenge",
+		"_postman_id": "efd7e20a-91ff-85bb-9f00-0fe9aaa05c3e",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get all shifts in account",
+			"request": {
+				"url": "{{wiw-code-challenge}}/shifts/",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get all shifts in account for a user",
+			"request": {
+				"url": "{{wiw-code-challenge}}/shifts/?userID=2",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get all shifts in account for a user with start time",
+			"request": {
+				"url": "{{wiw-code-challenge}}/shifts/?startTime=2019-10-02T19:06:05-06:00",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get single shift",
+			"request": {
+				"url": "{{wiw-code-challenge}}/shifts/d49d0fc8-8fcb-4810-bbe0-dad6ba276e66",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create a shift",
+			"request": {
+				"url": "{{wiw-code-challenge}}/shifts/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userID\": 1,\n  \"startTime\": \"2019-10-10T22:04:06-06:00\",\n  \"endTime\": \"2019-10-10T23:04:05-06:00\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "(not working) Delete shift in account by id",
+			"request": {
+				"url": "{{wiw-code-challenge}}/shifts/d49d0fc8-8fcb-4810-bbe0-dad6ba276e66",
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
