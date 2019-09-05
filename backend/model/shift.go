@@ -38,13 +38,10 @@ func ScanShifts(c *gin.Context) ([]Shift, error) {
 	return shifts, nil
 }
 
-func GetShifts(c *gin.Context) (*[]Shift, error) {
+func GetShifts(c *gin.Context, userID string, startTime string, endTime string) (*[]Shift, error) {
 	session := SessionFromContext(c)
 	ddb := DynamoDBFromContext(c)
 
-	userID := c.Query("userID")
-	startTime := c.Query("startTime")
-	endTime := c.Query("endTime")
 	filterSet := false
 
 	exprBuilder := expression.NewBuilder()
@@ -117,13 +114,8 @@ func GetShifts(c *gin.Context) (*[]Shift, error) {
 	return &shifts, nil
 }
 
-func GetShiftByID(c *gin.Context, id string) (*Shift, error) {
-	idUUID, err := uuid.Parse(id)
-	idBytes, err := idUUID.MarshalBinary()
-	if err != nil {
-		c.Error(fmt.Errorf("failed to marshal uuid to bytes, %v", err))
-		return nil, err
-	}
+// Return a shift by its uuid
+func GetShiftByID(c *gin.Context, idBytes []byte) (*Shift, error) {
 	shift := Shift{}
 	ddb := DynamoDBFromContext(c)
 	keyCond := expression.Key("ID").Equal(expression.Value(idBytes))

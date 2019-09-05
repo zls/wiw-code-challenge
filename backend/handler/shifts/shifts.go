@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+
 	"github.com/zls/wiw-code-challenge/backend/model"
 )
 
@@ -19,7 +21,11 @@ func GetAll(c *gin.Context) {
 }
 
 func GetShifts(c *gin.Context) {
-	shifts, err := model.GetShifts(c)
+	userID := c.Query("userID")
+	startTime := c.Query("startTime")
+	endTime := c.Query("endTime")
+
+	shifts, err := model.GetShifts(c, userID, startTime, endTime)
 	if err != nil {
 		c.Error(fmt.Errorf("failed to get shifts, %v", err))
 		c.JSON(http.StatusBadRequest, gin.H{})
@@ -33,7 +39,20 @@ func GetShifts(c *gin.Context) {
 
 func GetByID(c *gin.Context) {
 	id := c.Param("id")
-	shift, err := model.GetShiftByID(c, id)
+	idUUID, err := uuid.Parse(id)
+	if err != nil {
+		c.Error(fmt.Errorf("failed to parse id to bytes, %v", err))
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+	idBytes, err := idUUID.MarshalBinary()
+	if err != nil {
+		c.Error(fmt.Errorf("failed to marshal uuid to bytes, %v", err))
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+
+	shift, err := model.GetShiftByID(c, idBytes)
 	if err != nil {
 		c.Error(fmt.Errorf("failed to get shift by id, %v", err))
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
