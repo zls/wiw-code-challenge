@@ -2,6 +2,7 @@ package shifts
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -71,8 +72,10 @@ func Create(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		return
 	}
+	log.Printf("%+v", data)
 
-	shift, err := model.NewShift(data.UserID, data.AccountID, data.StartTime, data.EndTime)
+	session := model.SessionFromContext(c)
+	shift, err := model.NewShift(data.UserID, session.Account.ID, data.StartTime, data.EndTime)
 	if err != nil {
 		c.Error(fmt.Errorf("unable to create new shift object %v", err.Error()))
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})

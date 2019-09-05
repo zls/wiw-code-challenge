@@ -12,13 +12,13 @@ type MockSesssion struct {
 func NewMockSession() gin.HandlerFunc {
 	session := MockSesssion{
 		User: User{
-			ID:        0,
+			ID:        1,
 			FirstName: "Foo",
 			LastName:  "Bar",
 			Email:     "foo.bar@example.com",
 		},
 		Account: Account{
-			ID:   0,
+			ID:   1,
 			Name: "Foo Company",
 		},
 	}

@@ -115,6 +115,7 @@ func GetShifts(c *gin.Context, userID string, startTime string, endTime string) 
 }
 
 // Return a shift by its uuid
+// TODO <zls>: restrict to account
 func GetShiftByID(c *gin.Context, idBytes []byte) (*Shift, error) {
 	shift := Shift{}
 	ddb := DynamoDBFromContext(c)
@@ -132,9 +133,7 @@ func GetShiftByID(c *gin.Context, idBytes []byte) (*Shift, error) {
 		KeyConditionExpression:    expr.KeyCondition(),
 	})
 
-	// TODO <zls>: see if there is a constraint on ID to ensure uniqueness
-	// TODO <zls>: split this out to more easily catch
-	if err != nil || len(results.Items) > 1 {
+	if err != nil {
 		c.Error(fmt.Errorf("failed to find shift in db, %v", err))
 		return nil, err
 	}
@@ -146,11 +145,11 @@ func GetShiftByID(c *gin.Context, idBytes []byte) (*Shift, error) {
 }
 
 type Shift struct {
-	ID        uuid.UUID `json:"id"`
-	UserID    int       `form:"uid"`
-	AccountID int       `form:"aid"`
-	StartTime time.Time `form:"startTime" time_format:"2006-01-02T15:04:05"`
-	EndTime   time.Time `form:"endTime" time_format:"2006-01-02T15:04:05"`
+	ID        uuid.UUID
+	UserID    int `form:"userID" binding:"required"`
+	AccountID int
+	StartTime time.Time `form:"startTime" time_format:"2006-01-02T15:04:05" binding:"required"`
+	EndTime   time.Time `form:"endTime" time_format:"2006-01-02T15:04:05" binding:"required"`
 }
 
 // Create a new shift structure
@@ -184,11 +183,17 @@ func (s *Shift) Put(c *gin.Context) (*dynamodb.PutItemOutput, error) {
 		return nil, err
 	}
 	exprBuilder := expression.NewBuilder()
+	cond := expression.Not(expression.Name("UserID").Equal(expression.Value(s.UserID)))
+
 	// Start time does not fall between another start and end time
-	cond := expression.Not(expression.Name("StartTime").Between(expression.Value(s.StartTime), expression.Value(s.EndTime)))
+	cond1 := expression.Not(expression.Name("StartTime").Between(expression.Value(s.StartTime), expression.Value(s.EndTime)))
 	// End time does not fall between another start and end time
-	cond2 := cond.And(expression.Not(expression.Name("EndTime").Between(expression.Value(s.StartTime), expression.Value(s.EndTime))))
-	exprBuilder = exprBuilder.WithCondition(cond2)
+	cond2 := cond1.And(expression.Not(expression.Name("EndTime").Between(expression.Value(s.StartTime), expression.Value(s.EndTime))))
+
+	cond3 := cond.And(cond2)
+
+	// For user
+	exprBuilder = exprBuilder.WithCondition(cond3)
 
 	expr, err := exprBuilder.Build()
 	if err != nil {
