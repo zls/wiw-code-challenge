@@ -92,3 +92,33 @@ func Create(c *gin.Context) {
 		"shift": shift,
 	})
 }
+
+func DeleteByID(c *gin.Context) {
+	id := c.Param("id")
+	idUUID, err := uuid.Parse(id)
+	if err != nil {
+		c.Error(fmt.Errorf("failed to parse id to bytes, %v", err))
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+	idBytes, err := idUUID.MarshalBinary()
+	if err != nil {
+		c.Error(fmt.Errorf("failed to marshal uuid to bytes, %v", err))
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+
+	shift, err := model.GetShiftByID(c, idBytes)
+	if err != nil {
+		c.Error(fmt.Errorf("failed to get shift by id, %v", err))
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+	err = model.DeleteShiftByID(c, idBytes, shift.UserID, shift.StartTime.Format("2006-01-02T15:04:05-0700"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+
+}

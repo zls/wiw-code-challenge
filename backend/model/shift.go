@@ -144,6 +144,46 @@ func GetShiftByID(c *gin.Context, idBytes []byte) (*Shift, error) {
 	return &shift, nil
 }
 
+func DeleteShiftByID(c *gin.Context, shiftId []byte, userID int, startTime string) error {
+	ddb := DynamoDBFromContext(c)
+	// session := SessionFromContext(c)
+
+	// exprBuilder := expression.NewBuilder()
+	// cond := expression.And(
+	// 	expression.Name("AccountID").Equal(expression.Value(session.Account.ID)),
+	// 	expression.Name("ID").Equal(expression.Value(shiftId)))
+	// exprBuilder = exprBuilder.WithCondition(cond)
+	// expr, err := exprBuilder.Build()
+	// if err != nil {
+	// 	c.Error(fmt.Errorf("failed to build expression, %v", err))
+	// 	return err
+	// }
+	input := &dynamodb.DeleteItemInput{
+		TableName: aws.String(ddbTableName),
+		// ConditionExpression:       expr.Condition(),
+		// ExpressionAttributeNames:  expr.Names(),
+		// ExpressionAttributeValues: expr.Values(),
+		Key: map[string]*dynamodb.AttributeValue{
+			"UserID": {
+				N: aws.String(strconv.Itoa(userID)),
+			},
+			"StartTime": {
+				S: aws.String(startTime),
+			},
+		},
+	}
+	log.Printf("%+v", input)
+
+	output, err := ddb.DeleteItem(input)
+	if err != nil {
+		c.Error(fmt.Errorf("failed to delete shift %v", err))
+		return err
+	}
+	log.Printf("%+v", output)
+	return nil
+
+}
+
 type Shift struct {
 	ID        uuid.UUID
 	UserID    int `form:"userID" binding:"required"`

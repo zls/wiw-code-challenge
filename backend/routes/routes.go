@@ -21,6 +21,6 @@ func (r *Routes) Register(router *gin.Engine) {
 
 		r.Shifts.PUT("/:id", handler.NotImplemented)
 
-		r.Shifts.DELETE("/:id", handler.NotImplemented)
+		r.Shifts.DELETE("/:id", shifts.DeleteByID)
 	}
 }
