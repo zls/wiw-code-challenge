@@ -5,6 +5,7 @@
 
 1. docker-compose up
 1. Run dynamodb table creation scripts [create ddb table](#create-ddb-table) and [update gsi](#update-gsi)
+1. Run `make` to build and start server
 
 
 ### Create ddb table
