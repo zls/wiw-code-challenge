@@ -9,6 +9,7 @@
 
 
 ### Create ddb table
+```
 aws dynamodb create-table --endpoint-url http://localhost:8001 \
   --table-name shifts \
   --attribute-definitions \
@@ -18,8 +19,10 @@ aws dynamodb create-table --endpoint-url http://localhost:8001 \
     AttributeName=UserID,KeyType=HASH \
     AttributeName=StartTime,KeyType=RANGE \
   --provisioned-throughput=ReadCapacityUnits=1,WriteCapacityUnits=1
+```
 
 #### Update GSI
+```
 aws dynamodb update-table --endpoint-url http://localhost:8001 \
   --table-name shifts \
   --attribute-definitions \
@@ -31,12 +34,17 @@ aws dynamodb update-table --endpoint-url http://localhost:8001 \
   --attribute-definitions \
     AttributeName=AccountID,AttributeType=N \
   --global-secondary-index-updates '[ { "Create": {"IndexName": "ByAccount", "KeySchema": [{"AttributeName": "AccountID", "KeyType": "HASH"}, {"AttributeName": "StartTime", "KeyType": "RANGE"} ], "Projection": { "ProjectionType": "ALL" }, "ProvisionedThroughput": { "ReadCapacityUnits": 1, "WriteCapacityUnits": 1 } } } ]'
+```
 
 #### List ddb tables
+```
 aws dynamodb list-tables --endpoint-url http://localhost:8001
+```
 
 ### Describe ddb table
+```
 aws dynamodb describe-table --table shifts --endpoint-url http://localhost:8001
+```
 
 ### TODOS
 
@@ -48,8 +56,7 @@ aws dynamodb describe-table --table shifts --endpoint-url http://localhost:8001
 * rework dynamodb schema. `ByID` index could be a local secondary index. Though, it might make more sense to structure primary partition key off `AccountID` as this is probably the more common access pattern (`ByID` can be update accordingly)
 * return client errors. Currently the backend just returns a 404 and empty json.
 * timezones are not normalized, this interferes with natural sort and comparison. As long as a timezone is consistent across shifts for a user this isn't a problem. DynamoDB, not having a time type might not have been the best choice unless you can make the restriction to only allow shifts to a specific timezone, possibly through a location. Per `rfc3339`
->>> 5.1. Ordering
-
+> 5.1. Ordering
    If date and time components are ordered from least precise to most
    precise, then a useful property is achieved.  Assuming that the time
    zones of the dates and times are the same (e.g., all in UTC),
